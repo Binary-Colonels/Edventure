@@ -1,0 +1,79 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependencies
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Coverage and testing
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+.pytest_cache/
+.tox/
+
+# IDE specific files
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Build and distribution
+build/
+dist/
+
+Edventure-backend/__pycache__/utils.cpython-313.pyc
+Edventure-backend/apis/__pycache__/__init__.cpython-313.pyc
+Edventure-backend/apis/__pycache__/areas_of_interest.cpython-313.pyc
+Edventure-backend/apis/__pycache__/users.cpython-313.pyc
+Edventure-backend/apis/__pycache__/courses.cpython-313.pyc
+Edventure-backend/apis/__pycache__/enrollments.cpython-313.pyc
+Edventure-backend/apis/__pycache__/lessons.cpython-313.pyc
+Edventure-backend/apis/__pycache__/questions.cpython-313.pyc
+Edventure-backend/apis/__pycache__/quests.cpython-313.pyc
