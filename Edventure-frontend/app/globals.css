@@ -1,0 +1,274 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Modern purple/indigo primary theme */
+    --background: 240 33% 99%;
+    --foreground: 240 10% 3.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    --primary: 255 92% 57%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 5.9% 10%;
+    
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    
+    --accent: 261 84% 58%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 255 92% 57%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 240 10% 6%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 255 92% 57%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    
+    --accent: 261 84% 58%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 255 92% 57%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* Enhanced typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+  
+  h1 {
+    @apply text-3xl md:text-4xl;
+  }
+  
+  h2 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+}
+
+/* Enhanced card styling */
+.card {
+  @apply rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:shadow-md;
+}
+
+.card-hover {
+  @apply hover:border-primary/20 hover:bg-card/80;
+}
+
+/* Button enhancements */
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 
+         font-medium transition-all shadow-sm hover:shadow 
+         active:scale-[0.98] disabled:opacity-70;
+}
+
+.btn-secondary {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg px-4 py-2 
+         font-medium transition-all 
+         active:scale-[0.98] disabled:opacity-70;
+}
+
+.btn-outline {
+  @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground rounded-lg px-4 py-2 
+         font-medium transition-all 
+         active:scale-[0.98] disabled:opacity-70;
+}
+
+.btn-ghost {
+  @apply hover:bg-secondary rounded-lg px-4 py-2 
+         font-medium transition-all 
+         active:scale-[0.98] disabled:opacity-70;
+}
+
+.prose h3 {
+  @apply font-semibold mt-4 mb-2;
+}
+
+.prose p {
+  @apply mb-4;
+}
+
+.prose ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.prose li {
+  @apply mb-1;
+}
+
+.prose pre {
+  @apply mb-4;
+}
+
+/* SQL Game Styling */
+.monster-appearance-animation {
+  animation: monsterAppear 1s ease-out forwards;
+  filter: drop-shadow(0 0 10px rgba(101, 31, 255, 0.4));
+}
+
+@keyframes monsterAppear {
+  0% {
+    transform: translateY(30px) scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-10px) scale(1.05);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(5px) scale(0.98);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Map Path Animation */
+.map-path-animation {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawPath 3s ease-in-out forwards;
+}
+
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Monster Icon Hover Effect */
+.monster-icon {
+  transition: all 0.3s ease;
+}
+
+.monster-icon:hover {
+  transform: scale(1.1);
+  filter: brightness(1.1) drop-shadow(0 0 5px rgba(101, 31, 255, 0.6));
+}
+
+/* Cartoon-style game window container */
+.game-window-container {
+  height: 600px;
+  background-color: #f8f9ff;
+  background-image: 
+    linear-gradient(to bottom, rgba(101, 31, 255, 0.05), rgba(78, 13, 218, 0.1)),
+    url('/assets/map3.jpg'),
+    radial-gradient(circle at 70% 40%, rgba(101, 31, 255, 0.08) 0%, transparent 60%);
+  background-size: cover, cover, auto;
+  background-position: center;
+  background-blend-mode: overlay, soft-light, normal;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2), 0 8px 30px rgba(101, 31, 255, 0.15);
+}
+
+/* Adventure-style button for game */
+.adventure-button {
+  position: relative;
+  background-color: #651fff;
+  border: 2px solid #4e0da8;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.adventure-button:hover {
+  transform: translateY(-2px);
+  background-color: #7c4dff;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.adventure-button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Glassmorphism components */
+.glass {
+  @apply bg-white/80 dark:bg-black/60 backdrop-blur-md border border-white/20 dark:border-white/10;
+}
+
+/* Dashboard enhancements */
+.dashboard-card {
+  @apply card rounded-xl border bg-card p-5 shadow-sm transition-all duration-200;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: all 0.75s ease;
+  opacity: 0;
+}
+
+.dashboard-card:hover::before {
+  left: 125%;
+  opacity: 1;
+}
+
