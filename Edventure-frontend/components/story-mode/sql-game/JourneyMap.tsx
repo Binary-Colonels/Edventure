@@ -69,7 +69,7 @@ export default function JourneyMap({ onStartGame }: JourneyMapProps) {
           SQL Jungle Adventure Map
         </h2>
         <p className="text-lg text-amber-800 mt-2 max-w-2xl mx-auto bg-amber-50/70 p-2 rounded-lg">
-          Navigate through the treacherous jungle by defeating SQL monsters and unlocking new paths!
+          Face the Tabular Titan and learn to create SQL tables to escape the jungle!
         </p>
       </motion.div>
 
@@ -186,7 +186,7 @@ export default function JourneyMap({ onStartGame }: JourneyMapProps) {
             
             {/* Main path with animated drawing effect - with glow effect */}
             <motion.path 
-              d="M15,75 C20,70 25,40 30,35 C35,30 40,50 45,60 C48,65 52,30 55,25 C58,22 62,65 65,70 C68,73 72,50 75,40 C77,35 80,55 82,65 C83,70 86,30 88,20 C89,15 88,35 88,45 C88,50 75,20 70,15 C65,12 40,10 35,15 C30,18 25,40 22,45 C19,50 70,60 88,55" 
+              d="M15,75 C20,70 25,40 30,35" 
               stroke="#8B4513" 
               strokeWidth="1.5" 
               fill="none"
@@ -196,22 +196,20 @@ export default function JourneyMap({ onStartGame }: JourneyMapProps) {
               filter="url(#pathGlow)"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: showPathAnimation ? 1 : 0 }}
-              transition={{ duration: 5, ease: "easeInOut" }}
+              transition={{ duration: 2, ease: "easeInOut" }}
               className="map-path-animation"
             />
 
-            {/* Solid path underneath for better visibility - same curvy path */}
+            {/* Animated path - dotted footprints overlay */}
             <motion.path 
-              d="M15,75 C20,70 25,40 30,35 C35,30 40,50 45,60 C48,65 52,30 55,25 C58,22 62,65 65,70 C68,73 72,50 75,40 C77,35 80,55 82,65 C83,70 86,30 88,20 C89,15 88,35 88,45 C88,50 75,20 70,15 C65,12 40,10 35,15 C30,18 25,40 22,45 C19,50 70,60 88,55" 
-              stroke="#614726" 
-              strokeWidth="2" 
+              d="M15,75 C20,70 25,40 30,35" 
+              stroke="#61462D" 
+              strokeWidth="1" 
               fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              opacity="0.3"
+              strokeDasharray="0.5,8"
               initial={{ pathLength: 0 }}
               animate={{ pathLength: showPathAnimation ? 1 : 0 }}
-              transition={{ duration: 5, ease: "easeInOut", delay: 0.1 }}
+              transition={{ duration: 2, delay: 0.5, ease: "easeInOut" }}
             />
 
             {/* Path decorations */}
@@ -364,92 +362,96 @@ export default function JourneyMap({ onStartGame }: JourneyMapProps) {
           </div>
         </motion.div>
 
-        {/* Monsters along the path with staggered appearance - spread across map */}
-        {SQLMonsters.map((monster, index) => {
-          // Get position coordinates from our positioning function
-          const position = getMonsterPosition(index, SQLMonsters.length);
-          
-          // Set stage completion status (for future use with saved progress)
-          const isCompleted = false;
-          const isActive = activeLevel === monster.id;
-          const isHovered = hoveredLevel === monster.id;
-
-          return (
-            <motion.div 
-              key={monster.id}
-              className={`absolute z-20 cursor-pointer ${isActive || isHovered ? 'z-30' : ''}`}
-              style={{ 
-                left: `${position.x}%`, 
-                top: `${position.y}%` 
-              }}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ 
-                opacity: 1, 
-                scale: isActive || isHovered ? 1.1 : 1,
-                y: isActive || isHovered ? -5 : 0
-              }}
-              transition={{ 
-                delay: 1 + (index * 0.15),
-                duration: 0.5,
-                scale: { duration: 0.2 }
-              }}
-              onMouseEnter={() => setHoveredLevel(monster.id)}
-              onMouseLeave={() => setHoveredLevel(null)}
-              onClick={() => setActiveLevel(monster.id === activeLevel ? null : monster.id)}
-            >
-              {/* Level marker with monster image */}
-              <div className={`relative w-16 h-16 rounded-full overflow-hidden border-4 ${isActive || isHovered ? 'border-yellow-500 shadow-lg shadow-yellow-300/50' : 'border-amber-700'} transition-all duration-300 bg-amber-100/80 monster-icon`}>
-                <Image 
-                  src={monster.image}
-                  alt={monster.name}
-                  fill
-                  style={{ objectFit: 'contain' }}
-                  className={`transition-all duration-300 p-1 bg-white/90 ${isCompleted ? 'grayscale-0' : 'grayscale-[0%]'} ${isActive || isHovered ? 'grayscale-0 scale-110' : ''}`}
-                />
-                
-                {/* Level number badge */}
-                <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-amber-800 border-2 border-amber-100 flex items-center justify-center text-amber-100 font-bold text-xs z-20">
-                  {monster.id}
+        {/* Monsters on the map - only show the first monster */}
+        <div className="absolute inset-0 top-0 left-0 w-full h-full z-20">
+          {SQLMonsters.slice(0, 1).map((monster, index) => {
+            const position = getMonsterPosition(index, 1);
+            const isActive = activeLevel === monster.id;
+            const isHovered = hoveredLevel === monster.id;
+            
+            return (
+              <motion.div 
+                key={monster.id}
+                className={`absolute cursor-pointer transition-all duration-300 transform ${isActive ? 'scale-110' : 'scale-100'}`}
+                style={{ 
+                  left: `${position.x}%`, 
+                  top: `${position.y}%`, 
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: isActive || isHovered ? 30 : 20 
+                }}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: isActive ? 1.1 : 1,
+                  filter: isActive ? 'drop-shadow(0 0 10px rgba(255,215,0,0.7))' : 'none'
+                }}
+                transition={{ 
+                  delay: 2.5 + index * 0.2,
+                  duration: 0.5,
+                  type: "spring"
+                }}
+                onMouseEnter={() => setHoveredLevel(monster.id)}
+                onMouseLeave={() => setHoveredLevel(null)}
+                onClick={() => setActiveLevel(monster.id)}
+              >
+                <div className={`
+                  relative p-1 rounded-full 
+                  ${isActive || isHovered ? 'bg-amber-100/80 shadow-lg scale-110' : 'bg-transparent'}
+                  transition-all duration-300 hover:bg-amber-100/80 hover:shadow-lg
+                `}>
+                  <Image 
+                    src={monsterImages[`monster${monster.id}`]}
+                    alt={monster.name}
+                    width={isActive || isHovered ? 72 : 60} 
+                    height={isActive || isHovered ? 72 : 60}
+                    className="relative z-20 transition-all duration-300 drop-shadow-md"
+                  />
+                  <motion.div 
+                    className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-amber-800/90 text-amber-50 text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap font-bold z-30"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: isActive || isHovered ? 1 : 0, y: isActive || isHovered ? 0 : 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {monster.name}
+                  </motion.div>
                 </div>
-              </div>
-              
-              {/* Monster name label - visible only on hover/active to reduce clutter */}
-              {(isActive || isHovered) && (
-                <div className={`absolute -bottom-8 left-1/2 transform -translate-x-1/2 px-2 py-1 rounded-lg text-xs font-bold whitespace-nowrap shadow-md border w-max text-center transition-all duration-300 bg-yellow-100 border-yellow-500 scale-110`}>
-                {monster.name}
-              </div>
-              )}
-
-              {/* Info popup on hover or active */}
-              {(isHovered || isActive) && (
+                
+                {/* Monster info panel on hover/click */}
                 <motion.div 
-                  className="absolute -right-4 top-0 transform translate-x-full bg-amber-50/95 p-3 rounded-lg shadow-xl border-2 border-amber-600 w-64 z-40"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2 }}
+                  className="absolute bg-amber-50/95 border-2 border-amber-800 p-3 rounded-lg shadow-xl z-40 w-[250px]"
+                  style={{ 
+                    top: '100%',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    transformOrigin: 'top center',
+                    pointerEvents: isActive ? 'auto' : 'none'
+                  }}
+                  initial={{ opacity: 0, scale: 0, y: 10 }}
+                  animate={{ 
+                    opacity: isActive ? 1 : 0, 
+                    scale: isActive ? 1 : 0,
+                    y: isActive ? 20 : 10
+                  }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <h3 className="font-bold text-lg text-amber-900 border-b border-amber-200 pb-2 mb-2">{monster.name}</h3>
-                  <div className="flex gap-3 mb-3">
-                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-amber-300 flex-shrink-0 bg-white">
-                      <Image 
-                        src={monster.image}
-                        alt={monster.name}
-                        fill
-                        style={{ objectFit: 'contain' }}
-                        className="p-1"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-sm text-amber-800 font-medium">{monster.concept}</p>
-                      <p className="text-xs text-amber-600 italic mt-1">Skill: {monster.skill}</p>
-                    </div>
+                  <div className="text-center mb-2">
+                    <h3 className="text-amber-900 font-bold text-lg">{monster.name}</h3>
+                    <div className="text-amber-700 text-sm">{monster.challenge.concept}</div>
                   </div>
-                  <p className="text-xs mt-2 text-amber-800 bg-amber-100/60 p-2 rounded border border-amber-200">{monster.challenge}</p>
+                  <p className="text-amber-900 text-sm mb-3">{monster.challenge.description}</p>
+                  <div className="text-center mt-2">
+                    <Button
+                      onClick={onStartGame}
+                      className="bg-amber-800 hover:bg-amber-700 text-amber-50 px-4 py-1 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      Start Adventure
+                    </Button>
+                  </div>
                 </motion.div>
-              )}
-            </motion.div>
-          );
-        })}
+              </motion.div>
+            );
+          })}
+        </div>
 
         {/* Final Boss - Dragon's Lair Special Marker */}
         <motion.div 

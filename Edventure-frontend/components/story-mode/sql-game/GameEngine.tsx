@@ -140,7 +140,8 @@ export default function GameEngine() {
           `Great job! Your ${query} query was effective!`,
           gameState.currentMonster?.defeatMessage || 'You defeated the monster!',
           `You gained a new SQL power: ${newSkill}!`,
-          `You earned ${xpEarned} XP!`
+          `You earned ${xpEarned} XP!`,
+          'Congratulations! You have completed the SQL Jungle Adventure!'
         ],
         dialogSpeaker: 'narrator',
         character: {
@@ -153,49 +154,28 @@ export default function GameEngine() {
 
       // Update game progress in the story mode system
       updateSQLGameProgress({
-        levelsCompleted: gameState.level,
-        conceptsLearned: [...(gameState.currentMonster ? [gameState.currentMonster.concept] : [])],
-        skillsUnlocked: [...(newSkill ? [newSkill] : [])],
-        xpEarned: xpEarned
+        levelsCompleted: 1,
+        conceptsLearned: ['Databases & Tables'],
+        skillsUnlocked: ['Table Creation'],
+        xpEarned: xpEarned,
+        completionStatus: 'completed'
       })
 
-      // Move to next level after dialog
+      // End the game after the first level (Tabular Titan)
       setTimeout(() => {
-        const nextLevel = gameState.level + 1
-        
-        if (nextLevel > SQLMonsters.length) {
-          // Game completed
-          setGameState(prev => ({
-            ...prev,
-            currentMonster: null,
-            gameCompleted: true,
-            showDialog: true,
-            dialogText: [
-              'Congratulations! You have mastered SQL and escaped the jungle!',
-              'You have defeated all database monsters and learned all SQL concepts.',
-              `Total XP earned: ${prev.character.experience}`
-            ],
-            dialogSpeaker: 'narrator',
-            showVictory: true
-          }))
-          
-          // Update final game completion status
-          updateSQLGameProgress({
-            levelsCompleted: SQLMonsters.length,
-            completionStatus: 'completed'
-          })
-        } else {
-          // Next level
-          setGameState(prev => ({
-            ...prev,
-            level: nextLevel,
-            currentMonster: null,
-            character: {
-              ...prev.character,
-              position: 10
-            }
-          }))
-        }
+        setGameState(prev => ({
+          ...prev,
+          currentMonster: null,
+          gameCompleted: true,
+          showDialog: true,
+          dialogText: [
+            'Congratulations! You have mastered table creation and completed the SQL Jungle Adventure!',
+            'You have learned how to create tables in SQL - the foundation of database design.',
+            `Total XP earned: ${prev.character.experience}`
+          ],
+          dialogSpeaker: 'narrator',
+          showVictory: true
+        }))
       }, 3000)
     } else {
       // Handle failed query

@@ -1,12 +1,29 @@
-import StoryWorldPage from "@/components/story-mode/story-world-page"
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Story World | Edventure Learning Platform",
-  description: "Explore a story world",
+  description: "Redirecting to SQL Adventure",
 }
 
-export default function WorldPage({ params }: { params: { worldId: string } }) {
-  return <StoryWorldPage worldId={params.worldId} />
+export default function WorldPage() {
+  const router = useRouter()
+  
+  useEffect(() => {
+    // Redirect all story world pages to the SQL Adventure
+    router.push("/story-mode/sql-adventure")
+  }, [router])
+  
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-xl font-semibold mb-2">Redirecting...</h1>
+        <p className="text-muted-foreground">Taking you to the SQL Adventure</p>
+      </div>
+    </div>
+  )
 }
 

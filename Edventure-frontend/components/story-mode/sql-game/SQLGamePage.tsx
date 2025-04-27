@@ -62,13 +62,13 @@ export default function SQLGamePage() {
                       <div>
                         <h3 className="text-xl font-semibold mb-4">Your Mission</h3>
                         <p className="mb-3">
-                          You're trapped in the SQL Jungle! The only way to escape is to master SQL concepts by defeating the database monsters that guard your path.
+                          You're trapped in the SQL Jungle! The only way to escape is to master the basics of SQL by defeating the database monster that guards your path.
                         </p>
                         <p className="mb-3">
-                          Each monster represents a different SQL concept that you must learn to progress. Move forward in the jungle, face each monster, and defeat them with your SQL knowledge!
+                          The monster represents the foundational SQL concept of creating tables. You must learn to create a table correctly to progress and escape the jungle.
                         </p>
                         <p className="mb-5">
-                          With each victory, you'll gain new SQL powers and move closer to freedom. Can you escape the jungle and become a SQL master?
+                          With your victory, you'll gain the SQL power of table creation and earn your freedom from the jungle!
                         </p>
 
                         <div className="flex items-center mb-6">
@@ -89,10 +89,10 @@ export default function SQLGamePage() {
                         <h3 className="text-xl font-semibold mb-4">How to Play</h3>
                         <ul className="list-disc pl-5 space-y-2 mb-6">
                           <li>Use the arrow keys or buttons to move your character through the jungle</li>
-                          <li>When you encounter a monster, you'll need to solve an SQL challenge</li>
-                          <li>Type SQL queries or select the correct option to defeat monsters</li>
-                          <li>Each defeated monster grants you a new SQL skill</li>
-                          <li>Defeat all 13 monsters to escape the jungle and complete the game!</li>
+                          <li>When you encounter the Tabular Titan monster, you'll need to solve an SQL challenge</li>
+                          <li>Type the correct SQL query to create a table and defeat the monster</li>
+                          <li>Completing this challenge will grant you the Table Creation skill</li>
+                          <li>Defeat the Tabular Titan to escape the jungle and complete the game!</li>
                         </ul>
 
                         <Button 
@@ -132,33 +132,23 @@ export default function SQLGamePage() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>SQL Concepts You'll Learn</CardTitle>
+                    <CardTitle>SQL Concept You'll Learn</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      {[
-                        { name: "Databases & Tables", icon: "🏗️" },
-                        { name: "Data Types", icon: "🔤" },
-                        { name: "Constraints", icon: "🔒" },
-                        { name: "DDL Commands", icon: "🏛️" },
-                        { name: "DML Commands", icon: "🔄" },
-                        { name: "DCL Commands", icon: "🔐" },
-                        { name: "TCL Commands", icon: "💾" },
-                        { name: "Joins", icon: "🔗" },
-                        { name: "Subqueries", icon: "🔍" },
-                        { name: "Views", icon: "👁️" },
-                        { name: "Indexes", icon: "📖" },
-                        { name: "Stored Procedures", icon: "📦" },
-                        { name: "SQL Mastery", icon: "🏆" },
-                      ].map((concept, index) => (
-                        <div 
-                          key={index} 
-                          className="flex items-center p-3 border rounded-lg bg-white shadow-sm"
-                        >
-                          <span className="text-2xl mr-3">{concept.icon}</span>
-                          <span>{concept.name}</span>
-                        </div>
-                      ))}
+                    <div className="grid grid-cols-1 gap-4">
+                      <div 
+                        className="flex items-center p-3 border rounded-lg bg-white shadow-sm"
+                      >
+                        <span className="text-2xl mr-3">🏗️</span>
+                        <span>Databases & Tables - Learn to create SQL tables, the foundation of database design</span>
+                      </div>
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 className="font-semibold mb-2">Your Challenge:</h4>
+                        <p className="mb-2">Create a table to store data about explorers like yourself!</p>
+                        <p className="font-mono bg-gray-100 p-2 rounded">
+                          Write a CREATE TABLE statement for a table named 'explorers' with columns for id (integer, primary key), name (varchar), and level (integer).
+                        </p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
