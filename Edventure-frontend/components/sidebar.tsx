@@ -36,7 +36,6 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
     { id: "discussions", label: "Discussions", icon: MessageSquare, path: "/discussions" },
     { id: "notes", label: "Notes", icon: FileText, path: "/notes" },
     { id: "story-mode", label: "Story Mode", icon: BookOpenText, path: "/story-mode" },
-    { id: "analytics", label: "Analytics", icon: BarChart, path: "/analytics" },
   ]
 
   const mentorMenuItems = [
