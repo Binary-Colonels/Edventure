@@ -60,17 +60,7 @@ export const worldImages = {
   // Early jungle stages (Levels 1-3)
   earlyJungle: "/assets/level1.jpg", // Level 1 image
   
-  // Mid jungle stages (Levels 4-6)
-  midJungle: "/assets/level5.jpeg", // Level 5 image
-  
-  // Deep jungle stages (Levels 7-9)
-  deepJungle: "/assets/level8.jpeg", // Level 8 image
-  
-  // Ancient ruins stages (Levels 10-12)
-  ancientRuins: "/assets/level11.jpeg", // Level 11 image
-  
-  // Final boss stage (Level 13)
-  dragonLair: "/assets/level13.jpeg" // Level 13 image
+
 };
 
 // Journey map images
