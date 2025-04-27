@@ -15,30 +15,7 @@ export default function GameWorld({ level }: GameWorldProps) {
     switch (level) {
       case 1:
         return "/assets/level1.jpg"
-      case 2:
-        return "/assets/level2.jpeg"
-      case 3:
-        return "/assets/level3.jpeg"
-      case 4:
-        return "/assets/level4.jpeg"
-      case 5:
-        return "/assets/level5.jpeg"
-      case 6:
-        return "/assets/level6.jpeg"
-      case 7:
-        return "/assets/level7.jpeg"
-      case 8:
-        return "/assets/level8.jpeg"
-      case 9:
-        return "/assets/level9.jpeg"
-      case 10:
-        return "/assets/level10.jpeg"
-      case 11:
-        return "/assets/level11.jpeg"
-      case 12:
-        return "/assets/level12.jpeg"
-      case 13:
-        return "/assets/level13.jpeg"
+      
       default:
         return "/assets/level1.jpg"
     }
@@ -49,12 +26,6 @@ export default function GameWorld({ level }: GameWorldProps) {
     // Different mid-layer images for different level ranges
     if (level <= 3) {
       return "https://images.unsplash.com/photo-1600273970168-c3de7cc8ce44?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
-    } else if (level <= 6) {
-      return "https://images.unsplash.com/photo-1600241692536-152d283b1af9?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
-    } else if (level <= 9) {
-      return "https://images.unsplash.com/photo-1512618831669-1f7da81b9478?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
-    } else if (level <= 12) {
-      return "https://images.unsplash.com/photo-1621368286550-f54551f39b91?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
     } else {
       return "https://images.unsplash.com/photo-1508596374429-f515218fc6e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
     }
@@ -67,24 +38,6 @@ export default function GameWorld({ level }: GameWorldProps) {
         overlayColor: "bg-black/20",
         groundColor: "from-green-800 to-green-700",
         ambientLight: "0.9",
-      }
-    } else if (level <= 6) {
-      return {
-        overlayColor: "bg-black/30",
-        groundColor: "from-green-900 to-green-800",
-        ambientLight: "0.8",
-      }
-    } else if (level <= 9) {
-      return {
-        overlayColor: "bg-black/40",
-        groundColor: "from-green-950 to-green-900",
-        ambientLight: "0.7",
-      }
-    } else if (level <= 12) {
-      return {
-        overlayColor: "bg-blue-950/40",
-        groundColor: "from-stone-800 to-stone-700",
-        ambientLight: "0.6",
       }
     } else {
       return {
