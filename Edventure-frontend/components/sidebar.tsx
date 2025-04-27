@@ -36,7 +36,6 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
     { id: "discussions", label: "Discussions", icon: MessageSquare, path: "/discussions" },
     { id: "notes", label: "Notes", icon: FileText, path: "/notes" },
     { id: "story-mode", label: "Story Mode", icon: BookOpenText, path: "/story-mode" },
-    { id: "contests", label: "Contests", icon: Trophy, path: "/contests" },
     { id: "analytics", label: "Analytics", icon: BarChart, path: "/analytics" },
   ]
 
@@ -46,7 +45,6 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
     { id: "students", label: "Students", icon: Users, path: "/mentor/students" },
     { id: "discussions", label: "Discussions", icon: MessageSquare, path: "/mentor/discussions" },
     // { id: "assignments", label: "Assignments", icon: FileText, path: "/mentor/assignments" },
-    { id: "contests", label: "Contests", icon: Trophy, path: "/mentor/contests" },
     // { id: "grades", label: "Grades", icon: GraduationCap, path: "/mentor/grades" },
   ]
 
