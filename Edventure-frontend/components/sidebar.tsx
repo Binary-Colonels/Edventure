@@ -39,10 +39,10 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
   ]
 
   const mentorMenuItems = [
-    { id: "dashboard", label: "Dashboard", icon: Home, path: "/mentor/dashboard" },
-    { id: "courses", label: "My Courses", icon: BookOpen, path: "/mentor/courses" },
-    { id: "students", label: "Students", icon: Users, path: "/mentor/students" },
-    { id: "discussions", label: "Discussions", icon: MessageSquare, path: "/mentor/discussions" },
+    { id: "dashboard", label: "Dashboard", icon: Home, path: "/" },
+    { id: "courses", label: "My Courses", icon: BookOpen, path: "/" },
+    { id: "students", label: "Students", icon: Users, path: "/" },
+    { id: "discussions", label: "Discussions", icon: MessageSquare, path: "/" },
     // { id: "assignments", label: "Assignments", icon: FileText, path: "/mentor/assignments" },
     // { id: "grades", label: "Grades", icon: GraduationCap, path: "/mentor/grades" },
   ]

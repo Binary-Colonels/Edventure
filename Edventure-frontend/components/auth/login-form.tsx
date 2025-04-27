@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useAuth } from "@/contexts/auth-context"
 
@@ -22,7 +21,6 @@ const formSchema = z.object({
 export default function LoginForm() {
   const router = useRouter()
   const { login } = useAuth()
-  const [userType, setUserType] = useState<"student" | "mentor">("student")
   const [error, setError] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -40,23 +38,8 @@ export default function LoginForm() {
       const success = await login(values.email, values.password)
       
       if (success) {
-        // Get stored user data
-        const userDataString = localStorage.getItem("userData")
-        if (userDataString) {
-          const userData = JSON.parse(userDataString)
-          
-          // Check if user is a mentor (role admin or qualification mentor)
-          const isMentor = userData.role === "admin" || userData.qualification === "mentor"
-          
-          // Redirect based on role
-          if (isMentor) {
-            router.push("/mentor/dashboard")
-          } else {
-            router.push("/dashboard")
-          }
-        } else {
-          router.push("/dashboard")
-        }
+        // Redirect to student dashboard
+        router.push("/dashboard")
       } else {
         setError("Invalid credentials")
       }
@@ -76,17 +59,6 @@ export default function LoginForm() {
         <CardDescription className="text-center">Login to your account to continue</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Tabs
-          defaultValue="student"
-          className="w-full"
-          onValueChange={(value) => setUserType(value as "student" | "mentor")}
-        >
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="student">Student</TabsTrigger>
-            <TabsTrigger value="mentor">Mentor</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
         {error && (
           <Alert variant="destructive">
             <AlertDescription>{error}</AlertDescription>
@@ -142,4 +114,3 @@ export default function LoginForm() {
     </Card>
   )
 }
-
