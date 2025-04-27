@@ -6,7 +6,7 @@ Create a file named `.env` in the `Edventure-backend` directory with the followi
 
 ```
 # API Keys
-GEMINI_API_KEY=AIzaSyBOgemmbrwEhox1rEasakp38dsbjSPxLvk
+GEMINI_API_KEY=
 ELEVENLABS_API_KEY=your-elevenlabs-api-key
 
 # Application Settings
