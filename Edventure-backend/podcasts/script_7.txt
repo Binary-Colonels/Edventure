@@ -1,0 +1,25 @@
+Okay, here's a podcast script based on the SQL constraints document you provided.
+
+**(Intro Music – Upbeat and Techy)**
+
+**Host:** Hey everyone, and welcome to "Data Deep Dive"! Today, we're diving into the world of SQL constraints. We'll be taking a look at a list of tasks involving creating, modifying, and deleting database tables with an emphasis on understanding SQL constraints. Think of constraints as rules that help ensure the accuracy and integrity of the data in your database. Let's get started!
+
+**(Transition Music – Short and Sweet)**
+
+**Host:** First up, we're going to talk about creating tables. The document outlines creating several tables: a department table (named "dept"), an employee table ("emp"), and tables for salespeople ("S"), parts ("P"), projects ("J"), and a table linking them together ("SPJ"). Each table has specific columns, like `deptno` and `dept_name` in the department table. What's important here is defining primary keys—these are unique identifiers for each row in a table like `deptno` in the dept table. The emp table also includes salary (`sal`), which can't be empty (`NOT NULL`), and a self-referential foreign key for `mgr_no`. Foreign keys help link tables together, in this case to show who is the manager of each employee within the emp table itself. The SPJ table uses a composite primary key meaning that the combination of attributes, in this case sno, pno, and jno must be unique.
+
+**(Transition Music)**
+
+**Host:** Now that we have these tables, we can start working with them. The next set of instructions is all about modifying these tables and their constraints. This includes inserting at least five records into each table, dropping the `NOT NULL` constraint on the `sal` column in the employee table, and checking the name and type of all the constraints on the EMP table to make sure they are properly set. Also, some instructions cover dropping the unique constraint from the employee name column and the foreign key constraint on the department number within the emp table. We'll then add the foreign key constraint back onto the department number as a table label constraint. The instructions also cover dropping the check constraint on the department table.
+
+**(Transition Music)**
+
+**Host:** The instructions then cover manipulating the EMP table. We are going to add a 'COMM' column with a default value of 0, and then delete the default constraint from the emp table. We will then duplicate the emp table and also copy the structure of the DEPT table into a new table, but with different column names and without copying over any of the data from the table. Moving on, there are some instructions to change the employee name and job for employee number 100, followed by deleting an employee belonging to the computer department. Then, we are going to delete department 101 from the Department table and set the corresponding `deptno` to NULL for any employee in the EMP table that was assigned to department 101. We will then do the same for department 102, this time deleting the record within the EMP table, as well. Finally, we are instructed to delete employee 111 if they are the manager of employee 114, and delete employee Ravi whose employee number is 112, setting all employees with Ravi as their manager to have a NULL manager number. The final instruction is to drop the duplicate table of EMP that we created earlier.
+
+**(Transition Music)**
+
+**Host:** So, what did we learn today? SQL constraints are crucial for maintaining data integrity and consistency. We covered creating tables with primary and foreign keys, modifying constraints, and manipulating data within those constraints. These are essential skills for anyone working with databases, ensuring that your data is accurate and reliable.
+
+**(Outro Music)**
+
+**Host:** That's all for this episode of "Data Deep Dive." Thanks for tuning in! Be sure to subscribe for more database insights.

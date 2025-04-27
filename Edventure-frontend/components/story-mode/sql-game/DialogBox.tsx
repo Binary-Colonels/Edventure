@@ -1,8 +1,10 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { Volume2, VolumeX } from 'lucide-react'
+import { generateSpeech, playAudio, stopAudio, getVoiceForSpeaker, isTextToSpeechEnabled } from '@/lib/elevenLabsAPI'
 
 interface DialogBoxProps {
   text: string[]
@@ -16,7 +18,12 @@ export default function DialogBox({ text, speaker, speakerName, onComplete, mons
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
   const [displayedText, setDisplayedText] = useState('')
   const [isTyping, setIsTyping] = useState(true)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [audioEnabled, setAudioEnabled] = useState(true)
+  const [isGeneratingSpeech, setIsGeneratingSpeech] = useState(false)
+  const audioBlobRef = useRef<Blob | null>(null)
   const typingSpeed = 30 // milliseconds per character
+  const textToSpeechEnabled = isTextToSpeechEnabled()
 
   useEffect(() => {
     if (currentTextIndex >= text.length) {
@@ -46,11 +53,83 @@ export default function DialogBox({ text, speaker, speakerName, onComplete, mons
     return () => clearInterval(typingInterval)
   }, [currentTextIndex, text, isTyping])
 
+  // Effect to handle text-to-speech when text changes
+  useEffect(() => {
+    // If text-to-speech is disabled, skip all audio processing
+    if (!textToSpeechEnabled) {
+      return
+    }
+
+    // Stop previous audio when text changes
+    stopAudio()
+    setIsSpeaking(false)
+
+    if (currentTextIndex >= text.length || !audioEnabled) {
+      return
+    }
+
+    const currentText = text[currentTextIndex]
+    
+    // Generate and play speech for the current text
+    const generateAndPlaySpeech = async () => {
+      try {
+        setIsGeneratingSpeech(true)
+        // Get appropriate voice for the speaker
+        const voiceId = getVoiceForSpeaker(speaker)
+        
+        // Generate speech
+        const audioBlob = await generateSpeech(currentText, voiceId)
+        audioBlobRef.current = audioBlob
+        
+        // Play audio if not typing (full text is displayed)
+        if (!isTyping && audioEnabled) {
+          setIsSpeaking(true)
+          await playAudio(audioBlob)
+          setIsSpeaking(false)
+        }
+      } catch (error) {
+        console.error('Error generating or playing speech:', error)
+      } finally {
+        setIsGeneratingSpeech(false)
+      }
+    }
+
+    generateAndPlaySpeech()
+    
+    // Clean up audio when component unmounts
+    return () => {
+      stopAudio()
+    }
+  }, [currentTextIndex, text, speaker, audioEnabled, textToSpeechEnabled])
+
+  // Play speech when typing stops if audio is enabled
+  useEffect(() => {
+    if (!textToSpeechEnabled) {
+      return
+    }
+    
+    if (!isTyping && audioBlobRef.current && audioEnabled && !isSpeaking) {
+      const playCurrentAudio = async () => {
+        setIsSpeaking(true)
+        await playAudio(audioBlobRef.current!)
+        setIsSpeaking(false)
+      }
+      
+      playCurrentAudio()
+    }
+  }, [isTyping, audioEnabled, isSpeaking, textToSpeechEnabled])
+
   const handleNext = () => {
     if (isTyping) {
       // If typing, show all text immediately
       setIsTyping(false)
       return
+    }
+    
+    // Stop current audio playback
+    if (textToSpeechEnabled) {
+      stopAudio()
+      setIsSpeaking(false)
     }
     
     const nextIndex = currentTextIndex + 1
@@ -60,6 +139,21 @@ export default function DialogBox({ text, speaker, speakerName, onComplete, mons
     } else {
       onComplete()
     }
+  }
+
+  const toggleAudio = () => {
+    if (!textToSpeechEnabled) {
+      return
+    }
+    
+    if (audioEnabled) {
+      stopAudio()
+      setIsSpeaking(false)
+    } else if (audioBlobRef.current) {
+      playAudio(audioBlobRef.current)
+      setIsSpeaking(true)
+    }
+    setAudioEnabled(!audioEnabled)
   }
 
   // Get avatar based on speaker and context
@@ -155,8 +249,25 @@ export default function DialogBox({ text, speaker, speakerName, onComplete, mons
           {/* Content */}
           <div className="flex-1">
             {/* Speaker name with pixel art background */}
-            <div className={`inline-block px-4 py-1 rounded-t-lg ${style.nameColor} font-bold bg-white shadow-sm border-2 ${style.borderColor} text-sm relative -top-2`}>
+            <div className={`inline-flex items-center px-4 py-1 rounded-t-lg ${style.nameColor} font-bold bg-white shadow-sm border-2 ${style.borderColor} text-sm relative -top-2`}>
               {speakerName}
+              
+              {/* Audio toggle button - only show if text-to-speech is enabled */}
+              {textToSpeechEnabled && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-2 h-6 w-6 rounded-full"
+                  onClick={toggleAudio}
+                  disabled={isGeneratingSpeech}
+                >
+                  {audioEnabled ? (
+                    <Volume2 className={`h-4 w-4 ${isSpeaking ? 'text-green-500' : ''}`} />
+                  ) : (
+                    <VolumeX className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
             </div>
             
             {/* Text content with pixel font style */}

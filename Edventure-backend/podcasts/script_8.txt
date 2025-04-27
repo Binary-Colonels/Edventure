@@ -1,0 +1,11 @@
+Okay, here's a podcast script based on the SQL assignment provided.
+
+**Intro Music (brief)**
+
+**Host:** Hey everyone, and welcome to Database Dive! Today, we're breaking down an SQL assignment focused on constraints. Think of constraints as the rules that ensure your database is accurate and reliable. We'll be going through some common tasks, from creating tables with specific rules to modifying existing ones. So, grab your headphones, and let's dive in!
+
+**Host:** First up, let's talk about creating tables. The assignment starts by asking us to create a "department" table. This table will have a department number and department name. The key here is the `deptno`, which will be the primary key, meaning it has to be unique for each department. The `dept_name` must be in a specific list (Accounting, Comp, or Elect), so you can easily categorize them.
+
+**Host:** Next, we're tasked with creating an "employee" table. This is a bit more complex. We've got employee number, name, job title, salary, department number, and manager number. Again, the `empno` is the primary key, and the `emp_name` has to be unique to avoid having multiple same names. Plus, the job title can only be Professor, AP, or Lecturer. Salary can't be empty (that's the NOT NULL constraint), and `deptno` acts as a foreign key. The manager number refers back to the employee table itself, making it a self-referential foreign key. Think of this as the employee managing another employee and both are in the same table! We also need to create salesperson, part, and project tables in a similar fashion.
+
+**Host:** Okay, now that we have tables, let's talk about manipulating them. The assignment has a lot of tasks in this area. First, we are asked to insert at least 5 appropriate records in the tables. Then, we are asked to drop `NOT NULL` constraints from the employee table.

@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
-import { FileText, ThumbsUp, ThumbsDown, Trash2, Upload, BookOpenCheck } from "lucide-react"
+import { FileText, ThumbsUp, ThumbsDown, Trash2, Upload, BookOpenCheck, Headphones, Volume2, Download } from "lucide-react"
 import axios from "axios"
 
 // Add axios interceptor to include token in all requests
@@ -33,6 +33,7 @@ interface Note {
   downvote_count: number
   created_at: string
   has_quiz?: number
+  has_podcast?: number
 }
 
 interface Question {
@@ -44,6 +45,12 @@ interface Question {
 
 interface Quiz {
   questions: Question[]
+}
+
+interface PodcastData {
+  podcast_url: string
+  title: string
+  script: string
 }
 
 export default function NotesPage() {
@@ -60,6 +67,10 @@ export default function NotesPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [currentNoteTitle, setCurrentNoteTitle] = useState("")
+  const [isPodcastGenerating, setIsPodcastGenerating] = useState(false)
+  const [isPodcastDialogOpen, setIsPodcastDialogOpen] = useState(false)
+  const [currentPodcast, setCurrentPodcast] = useState<PodcastData | null>(null)
+  const [currentPodcastNoteId, setCurrentPodcastNoteId] = useState<number | null>(null)
   const { toast } = useToast()
 
   const toggleSidebar = () => {
@@ -168,7 +179,16 @@ export default function NotesPage() {
       })
 
       if (response.data.success) {
-        fetchNotes()
+        setNotes(prev => prev.map(note => {
+          if (note.id === noteId) {
+            return {
+              ...note,
+              upvote_count: response.data.upvote_count,
+              downvote_count: response.data.downvote_count
+            }
+          }
+          return note
+        }))
       }
     } catch (error) {
       toast({
@@ -180,8 +200,13 @@ export default function NotesPage() {
   }
 
   const handleDelete = async (noteId: number) => {
+    if (!confirm("Are you sure you want to delete this note?")) {
+      return
+    }
+
     try {
       const response = await axios.delete(`http://127.0.0.1:5000/notes/${noteId}`)
+
       if (response.data.success) {
         toast({
           title: "Success",
@@ -220,33 +245,32 @@ export default function NotesPage() {
     }
   }
 
-  // Generate quiz from note
   const handleGenerateQuiz = async (noteId: number, noteTitle: string) => {
     try {
       setIsQuizGenerating(true)
-      setCurrentNoteTitle(noteTitle)
-      
       const response = await axios.get(`http://127.0.0.1:5000/notes/generate_quiz/${noteId}`)
-      
+
       if (response.data.success) {
+        setNotes(prev => prev.map(note => {
+          if (note.id === noteId) {
+            return { ...note, has_quiz: 1 }
+          }
+          return note
+        }))
+
         setCurrentQuiz(response.data.quiz)
+        setCurrentNoteTitle(noteTitle)
         setCurrentQuestionIndex(0)
         setSelectedOption(null)
         setIsQuizDialogOpen(true)
-        
-        // Update notes to reflect that this note now has a quiz
-        const updatedNotes = notes.map(note => 
-          note.id === noteId ? { ...note, has_quiz: 1 } : note
-        )
-        setNotes(updatedNotes)
-        
+      } else {
         toast({
-          title: "Success",
-          description: "Quiz generated successfully!"
+          title: "Error",
+          description: "Failed to generate quiz",
+          variant: "destructive"
         })
       }
     } catch (error) {
-      console.error("Quiz generation error:", error)
       toast({
         title: "Error",
         description: "Failed to generate quiz",
@@ -257,6 +281,67 @@ export default function NotesPage() {
     }
   }
 
+  const handleGeneratePodcast = async (noteId: number, noteTitle: string) => {
+    try {
+      setIsPodcastGenerating(true)
+      setCurrentPodcastNoteId(noteId)
+      
+      const response = await axios.get(`http://127.0.0.1:5000/notes/generate_podcast/${noteId}`)
+
+      if (response.data.success) {
+        setNotes(prev => prev.map(note => {
+          if (note.id === noteId) {
+            return { ...note, has_podcast: 1 }
+          }
+          return note
+        }))
+
+        setCurrentPodcast(response.data)
+        setCurrentNoteTitle(noteTitle)
+        setIsPodcastDialogOpen(true)
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to generate podcast",
+          variant: "destructive"
+        })
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate podcast",
+        variant: "destructive"
+      })
+    } finally {
+      setIsPodcastGenerating(false)
+      setCurrentPodcastNoteId(null)
+    }
+  }
+
+  const handleDownloadPodcast = async () => {
+    if (!currentPodcast) return
+    
+    try {
+      const response = await axios.get(`http://127.0.0.1:5000${currentPodcast.podcast_url}`, {
+        responseType: "blob"
+      })
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement("a")
+      link.href = url
+      link.setAttribute("download", `${currentPodcast.title}.mp3`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to download podcast",
+        variant: "destructive"
+      })
+    }
+  }
+
   const handleOptionSelect = (option: string) => {
     setSelectedOption(option)
   }
@@ -264,16 +349,14 @@ export default function NotesPage() {
   const handleNextQuestion = () => {
     if (!currentQuiz) return
     
-    if (currentQuestionIndex < currentQuiz.questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1)
+    const nextIndex = currentQuestionIndex + 1
+    if (nextIndex < currentQuiz.questions.length) {
+      setCurrentQuestionIndex(nextIndex)
       setSelectedOption(null)
     } else {
-      // Quiz completed
-      toast({
-        title: "Quiz Completed",
-        description: "Congratulations on completing the quiz!"
-      })
       setIsQuizDialogOpen(false)
+      setCurrentQuiz(null)
+      setCurrentQuestionIndex(0)
     }
   }
 
@@ -316,7 +399,10 @@ export default function NotesPage() {
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
                         <span className="truncate">{note.title}</span>
-                        {note.has_quiz === 1 && <BookOpenCheck className="h-5 w-5 text-green-500" aria-label="Has Quiz" />}
+                        <div className="flex items-center gap-1">
+                          {note.has_quiz === 1 && <BookOpenCheck className="h-5 w-5 text-green-500" aria-label="Has Quiz" />}
+                          {note.has_podcast === 1 && <Headphones className="h-5 w-5 text-blue-500" aria-label="Has Podcast" />}
+                        </div>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -363,6 +449,20 @@ export default function NotesPage() {
                           disabled={isQuizGenerating}
                         >
                           {isQuizGenerating ? "Generating..." : (note.has_quiz === 1 ? "Take Quiz" : "Generate Quiz")}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleGeneratePodcast(note.id, note.title)}
+                          disabled={isPodcastGenerating && currentPodcastNoteId === note.id}
+                        >
+                          {isPodcastGenerating && currentPodcastNoteId === note.id ? (
+                            "Generating..."
+                          ) : note.has_podcast === 1 ? (
+                            <><Headphones className="h-4 w-4 mr-1" /> Listen</>
+                          ) : (
+                            <><Volume2 className="h-4 w-4 mr-1" /> Create Podcast</>
+                          )}
                         </Button>
                         <Button 
                           variant="outline" 
@@ -502,10 +602,58 @@ export default function NotesPage() {
               Close
             </Button>
             {selectedOption && (
-              <Button onClick={handleNextQuestion}>
-                {currentQuestionIndex < (currentQuiz?.questions.length || 0) - 1 ? "Next Question" : "Finish Quiz"}
+              <Button 
+                onClick={handleNextQuestion}
+              >
+                {currentQuestionIndex === (currentQuiz?.questions.length ?? 0) - 1 ? "Finish" : "Next"}
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Podcast Dialog */}
+      <Dialog open={isPodcastDialogOpen} onOpenChange={setIsPodcastDialogOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Audio Podcast: {currentNoteTitle}</DialogTitle>
+            <DialogDescription>
+              Listen to the audio version of this note
+            </DialogDescription>
+          </DialogHeader>
+          {currentPodcast && (
+            <div className="space-y-4">
+              <div className="bg-muted p-4 rounded-md">
+                <audio 
+                  className="w-full" 
+                  controls 
+                  src={`http://127.0.0.1:5000${currentPodcast.podcast_url}`}
+                >
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+              
+              <div className="space-y-2">
+                <div className="text-sm font-medium">Podcast Transcript</div>
+                <div className="max-h-64 overflow-y-auto p-3 bg-muted/30 text-sm rounded-md">
+                  {currentPodcast.script}
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsPodcastDialogOpen(false)}
+            >
+              Close
+            </Button>
+            <Button 
+              onClick={handleDownloadPodcast}
+              disabled={!currentPodcast}
+            >
+              <Download className="mr-2 h-4 w-4" /> Download Podcast
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

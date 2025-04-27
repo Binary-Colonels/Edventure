@@ -410,9 +410,12 @@ def main():
     elif args.command == 'examples':
         example_usage()
     
+    elif args.command == 'add_podcast_column':
+        # Specifically add the has_podcast column to the notes table
+        add_column('notes', 'has_podcast', 'INTEGER', 0)
+    
     else:
-        print("Please specify a command. Use -h for help.")
-        example_usage()
+        print("Unknown command")
 
 if __name__ == "__main__":
     main() 

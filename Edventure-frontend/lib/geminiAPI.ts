@@ -1,6 +1,6 @@
 import axios from "axios"
 
-const API_KEY = 'AIzaSyCy4-wPjHJB03w-spa2IvcOIJbb9WOyB7o'  // Best practice: use .env
+const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || 'AIzaSyCy4-wPjHJB03w-spa2IvcOIJbb9WOyB7o'
 
 export const fetchGeminiResponse = async (userMessage: string): Promise<string> => {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`

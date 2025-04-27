@@ -1,0 +1,18 @@
+Okay, here's a podcast script based on the provided document about SQL constraints.
+
+**Podcast Intro**
+
+(Upbeat intro music fades slightly)
+
+Host: Hey everyone, and welcome to "Database Demystified"! Today, we're diving into the world of SQL constraints. We'll be using a practical assignment as our guide to understand how to create, modify, and manage constraints in a database. Essentially, we're talking about how to set the rules for your data to ensure accuracy and consistency. Let's get started!
+
+**Creating Tables and Defining Constraints**
+
+Host: First up, the assignment asks us to create a few tables: a department table, an employee table, a salesperson table, a parts table, a project table, and a table to represent which salesperson is working on which project. For each table, we need to define which attributes, or columns, it will have, and most importantly, set constraints on them.
+
+Host: Think of constraints as rules for the data within each column. For instance, we need to set 'deptno' as the *primary key* in our department table. This means 'deptno' must be unique for each department, and it can't be empty. We also want 'dept_name' to be restricted to only a few options, in this case 'Acc', 'comp', and 'elect'.
+The employee table gets a little more interesting. 'empno' is its primary key, employee names must be unique, salary can't be left blank, and the 'deptno' links back to the department table, making it a *foreign key*. This ensures that every employee is assigned to a valid department! Also, the manager number refers back to the employee table itself, meaning an employee can also be a manager. This is called a self-referential foreign key.
+
+**Modifying and Dropping Constraints**
+
+Host: Now, after setting up our basic tables, we have to start tweaking them. The assignment then moves into modifying these tables. We have to add some records and then start dropping and adding constraints to play around with how these can be updated.

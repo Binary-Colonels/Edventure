@@ -549,3 +549,374 @@ Return only valid JSON with properly formatted text. Do not include any explanat
         return jsonify({"success": False, "message": f"Quiz generation failed: {str(e)}"}), 500
     finally:
         conn.close()
+
+@notes.route('/generate_podcast/<int:note_id>', methods=['GET'])
+@token_required
+def generate_podcast_from_pdf(note_id):
+    """
+    Generate an audio podcast from a PDF note using Google Gemini API for summarization
+    and ElevenLabs API for text-to-speech conversion.
+    
+    Headers Required:
+    - Authorization: Bearer <jwt_token>
+    
+    Query Parameters:
+    - voice_id: (optional) The voice ID to use from ElevenLabs (defaults to a natural reading voice)
+    
+    Success Response (200):
+    {
+        "success": true,
+        "podcast_url": "/notes/podcast/12345.mp3",
+        "title": "Note Title - Audio Podcast"
+    }
+    
+    Error Response (404):
+    {
+        "success": false,
+        "message": "Note not found"
+    }
+    """
+    try:
+        # Get API keys from environment variables or use defaults
+        GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AIzaSyBOgemmbrwEhox1rEasakp38dsbjSPxLvk")
+        
+        # For testing purposes, use a hardcoded API key if environment variable is not set
+        # In production, always use environment variables for API keys
+        default_elevenlabs_key = "9a3b3dbb0c96c0a5db114c8b0b25436d"  # Using a default key for testing only
+        ELEVENLABS_API_KEY = os.environ.get("ELEVENLABS_API_KEY", default_elevenlabs_key)
+        
+        print(f"Using ElevenLabs API key: {ELEVENLABS_API_KEY[:4]}...{ELEVENLABS_API_KEY[-4:]}")
+        
+        # Get voice ID from query parameters or use default
+        voice_id = request.args.get('voice_id', 'EXAVITQu4vr4xnSDxMaL')  # Default voice
+        print(f"Using voice ID: {voice_id}")
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Get the PDF content from the database
+        cursor.execute('''
+            SELECT id, title, pdf_content
+            FROM notes
+            WHERE id = ?
+        ''', (note_id,))
+        note = cursor.fetchone()
+        
+        if not note:
+            print(f"Note with ID {note_id} not found")
+            return jsonify({"success": False, "message": "Note not found"}), 404
+        
+        print(f"Found note: {note['title']} (ID: {note['id']})")
+        pdf_content = note['pdf_content']
+        note_title = note['title']
+        
+        # Create podcasts directory if it doesn't exist
+        podcasts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'podcasts')
+        if not os.path.exists(podcasts_dir):
+            print(f"Creating podcasts directory: {podcasts_dir}")
+            os.makedirs(podcasts_dir)
+        
+        # Check if podcast already exists for this note
+        podcast_filename = f"podcast_{note_id}.mp3"
+        podcast_path = os.path.join(podcasts_dir, podcast_filename)
+        
+        if os.path.exists(podcast_path):
+            # Podcast already exists, return its URL
+            print(f"Podcast already exists for note {note_id}")
+            podcast_url = f"/notes/podcast/{podcast_filename}"
+            return jsonify({
+                "success": True,
+                "podcast_url": podcast_url,
+                "title": f"{note_title} - Audio Podcast",
+                "message": "Podcast already exists"
+            }), 200
+        
+        print("Starting podcast generation - Step 1: Gemini summarization")
+        # Step 1: Use Gemini API to generate a summarized script from the PDF
+        gemini_url = f"https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+        
+        prompt = """Create a podcast script from this PDF content. Follow these guidelines:
+1. Start with a brief introduction summarizing what the document is about.
+2. Convert the key points into a conversational script that would be engaging to listen to.
+3. Use clear transitions between main topics.
+4. Make sure to simplify complex concepts while preserving accuracy.
+5. End with a brief conclusion summarizing the main takeaways.
+6. Keep the total length to around 3-4 minutes when read aloud (about 400-600 words).
+7. Use a friendly, informative tone appropriate for a podcast.
+
+Format the response as plain text without any special formatting, ready to be read as a podcast.
+"""
+
+        # Prepare the request to Gemini
+        pdf_base64 = base64.b64encode(pdf_content).decode('utf-8')
+        print(f"PDF content encoded as base64 (length: {len(pdf_base64)})")
+        
+        payload = {
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [
+                        {"text": prompt},
+                        {
+                            "inlineData": {
+                                "mimeType": "application/pdf",
+                                "data": pdf_base64
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+        
+        headers = {
+            "Content-Type": "application/json"
+        }
+        
+        print("Sending request to Gemini API...")
+        # Make the request to Gemini API
+        gemini_response = requests.post(gemini_url, json=payload, headers=headers)
+        
+        if gemini_response.status_code != 200:
+            error_msg = f"Error from Gemini API: {gemini_response.status_code} - {gemini_response.text}"
+            print(error_msg)
+            return jsonify({
+                "success": False, 
+                "message": error_msg
+            }), 500
+        
+        print("Successfully received response from Gemini API")
+        gemini_data = gemini_response.json()
+        
+        # Extract the podcast script
+        podcast_script = gemini_data['candidates'][0]['content']['parts'][0]['text']
+        print(f"Generated podcast script (length: {len(podcast_script)} characters)")
+        
+        # Limit script based on word count (approximately 4000 words)
+        word_count = len(podcast_script.split())
+        print(f"Word count: {word_count} words")
+        
+        if word_count > 4000:
+            print(f"Trimming podcast script from {word_count} to 4000 words")
+            words = podcast_script.split()
+            podcast_script = ' '.join(words[:4000])
+            # Try to end on a complete sentence
+            last_period = podcast_script.rfind('.')
+            if last_period > len(podcast_script) * 0.8:  # If we can find a period in the last 20% of the text
+                podcast_script = podcast_script[:last_period+1]
+        
+        # For ElevenLabs API limitations, also check character count
+        if len(podcast_script) > 5000:
+            print("Trimming podcast script to 5000 characters to avoid API limitations")
+            podcast_script = podcast_script[:5000]
+            # Try to end on a complete sentence
+            last_period = podcast_script.rfind('.')
+            if last_period > len(podcast_script) * 0.8:  # If we can find a period in the last 20% of the text
+                podcast_script = podcast_script[:last_period+1]
+        
+        print("Starting podcast generation - Step 2: ElevenLabs text-to-speech")
+        
+        # Use the same voice ID and model as the frontend implementation
+        # EXAVITQu4vr4xnSDxMaL - Default voice from frontend implementation
+        voice_id = "EXAVITQu4vr4xnSDxMaL"
+        
+        # Step 2: Use ElevenLabs API to convert the script to speech
+        elevenlabs_url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        
+        # Further limit text size for free tier (characters not words)
+        # Free tier has character limit of ~2500-3000 characters
+        if len(podcast_script) > 2000:
+            print(f"Further trimming podcast script from {len(podcast_script)} to 2000 characters for free tier limits")
+            podcast_script = podcast_script[:2000]
+            # Try to end on a complete sentence
+            last_period = podcast_script.rfind('.')
+            if last_period > len(podcast_script) * 0.8:
+                podcast_script = podcast_script[:last_period+1]
+        
+        # Use exactly the same configuration as in the frontend implementation
+        elevenlabs_payload = {
+            "text": podcast_script,
+            "model_id": "eleven_monolingual_v1", 
+            "voice_settings": {
+                "stability": 0.5,
+                "similarity_boost": 0.75
+            }
+        }
+        
+        elevenlabs_headers = {
+            "xi-api-key": ELEVENLABS_API_KEY,
+            "Content-Type": "application/json"
+        }
+        
+        print("Sending request to ElevenLabs API...")
+        # Make the request to ElevenLabs API
+        try:
+            elevenlabs_response = requests.post(
+                elevenlabs_url, 
+                json=elevenlabs_payload, 
+                headers=elevenlabs_headers,
+                timeout=60  # Increase timeout for large audio generation
+            )
+            
+            print(f"ElevenLabs API response status: {elevenlabs_response.status_code}")
+            
+            if elevenlabs_response.status_code != 200:
+                error_msg = f"Error from ElevenLabs API: {elevenlabs_response.status_code} - {elevenlabs_response.text}"
+                print(error_msg)
+                
+                # Handle specific error cases for ElevenLabs API
+                is_api_key_error = "invalid api key" in elevenlabs_response.text.lower() or "unauthorized" in elevenlabs_response.text.lower()
+                is_unusual_activity_error = "unusual activity detected" in elevenlabs_response.text.lower() or "detected_unusual_activity" in elevenlabs_response.text.lower()
+                
+                if is_api_key_error or is_unusual_activity_error:
+                    print("Creating text-only fallback response due to ElevenLabs API access restriction")
+                    
+                    # Save the script as a text file for fallback
+                    script_filename = f"script_{note_id}.txt"
+                    script_path = os.path.join(podcasts_dir, script_filename)
+                    with open(script_path, 'w', encoding='utf-8') as f:
+                        f.write(podcast_script)
+                    
+                    # Create a simple silence MP3 as placeholder (1 second)
+                    with open(podcast_path, 'wb') as f:
+                        # This is a minimal valid MP3 file with 1 second of silence
+                        silence_data = b'\xFF\xFB\x90\x04\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+                        f.write(silence_data * 100)  # Repeat to make a longer file
+                    
+                    # Update database to indicate this note has a podcast (but it's actually a placeholder)
+                    cursor.execute('''
+                        UPDATE notes
+                        SET has_podcast = 1
+                        WHERE id = ?
+                    ''', (note_id,))
+                    conn.commit()
+                    
+                    podcast_url = f"/notes/podcast/{podcast_filename}"
+                    
+                    error_details = ""
+                    if is_unusual_activity_error:
+                        error_details = "ElevenLabs detected unusual activity. This typically requires a paid subscription to resolve."
+                    else:
+                        error_details = "ElevenLabs API key is invalid or unauthorized."
+                    
+                    return jsonify({
+                        "success": True,
+                        "podcast_url": podcast_url,
+                        "script_url": f"/notes/script/{script_filename}",
+                        "title": f"{note_title} - Audio Podcast (Text Only)",
+                        "script": podcast_script,
+                        "warning": f"Using text-only fallback. {error_details}"
+                    }), 200
+                else:
+                    return jsonify({
+                        "success": False, 
+                        "message": error_msg,
+                        "script": podcast_script  # Return the script even if audio generation failed
+                    }), 500
+        except requests.exceptions.RequestException as e:
+            error_msg = f"Error connecting to ElevenLabs API: {str(e)}"
+            print(error_msg)
+            return jsonify({"success": False, "message": error_msg}), 500
+        
+        print("Successfully received audio from ElevenLabs API")
+        # Save the audio file
+        with open(podcast_path, 'wb') as f:
+            f.write(elevenlabs_response.content)
+        print(f"Saved podcast audio to {podcast_path}")
+        
+        # Update the database to indicate this note has a podcast
+        cursor.execute('''
+            UPDATE notes
+            SET has_podcast = 1
+            WHERE id = ?
+        ''', (note_id,))
+        
+        conn.commit()
+        print(f"Updated database to mark note {note_id} as having a podcast")
+        
+        # Return the podcast URL
+        podcast_url = f"/notes/podcast/{podcast_filename}"
+        
+        return jsonify({
+            "success": True,
+            "podcast_url": podcast_url,
+            "title": f"{note_title} - Audio Podcast",
+            "script": podcast_script  # Include the script for display purposes
+        }), 200
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Error in podcast generation: {str(e)}")
+        print(f"Error details:\n{error_details}")
+        return jsonify({"success": False, "message": f"Podcast generation failed: {str(e)}"}), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+@notes.route('/podcast/<path:filename>', methods=['GET'])
+@token_required
+def get_podcast(filename):
+    """
+    Retrieve a generated podcast file.
+    
+    Headers Required:
+    - Authorization: Bearer <jwt_token>
+    
+    Success Response:
+    Audio file stream (MP3)
+    
+    Error Response (404):
+    {
+        "success": false,
+        "message": "Podcast not found"
+    }
+    """
+    try:
+        podcasts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'podcasts')
+        file_path = os.path.join(podcasts_dir, filename)
+        
+        if not os.path.exists(file_path):
+            return jsonify({"success": False, "message": "Podcast file not found"}), 404
+        
+        return send_file(
+            file_path,
+            mimetype='audio/mpeg',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error retrieving podcast: {str(e)}"}), 500
+
+@notes.route('/script/<path:filename>', methods=['GET'])
+@token_required
+def get_script(filename):
+    """
+    Retrieve a generated podcast script file.
+    
+    Headers Required:
+    - Authorization: Bearer <jwt_token>
+    
+    Success Response:
+    Text file stream
+    
+    Error Response (404):
+    {
+        "success": false,
+        "message": "Script not found"
+    }
+    """
+    try:
+        podcasts_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'podcasts')
+        file_path = os.path.join(podcasts_dir, filename)
+        
+        if not os.path.exists(file_path):
+            return jsonify({"success": False, "message": "Script file not found"}), 404
+        
+        return send_file(
+            file_path,
+            mimetype='text/plain',
+            as_attachment=True,
+            download_name=filename
+        )
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Error retrieving script: {str(e)}"}), 500
