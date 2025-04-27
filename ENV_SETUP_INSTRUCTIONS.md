@@ -23,7 +23,7 @@ Create a file named `.env.local` in the `Edventure-frontend` directory with the 
 
 ```
 # API Keys for AI services
-NEXT_PUBLIC_GEMINI_API_KEY=AIzaSyCy4-wPjHJB03w-spa2IvcOIJbb9WOyB7o
+NEXT_PUBLIC_GEMINI_API_KEY=
 NEXT_PUBLIC_ELEVENLABS_API_KEY=your-elevenlabs-api-key-here
 
 # Feature flags 
